@@ -122,7 +122,7 @@ public class PlayerController : MonoBehaviour, IDamagable
         DisableRagdoll();
 
         if(GameManager.Instance.player == null) GameManager.Instance.RegisterPlayer(this.gameObject);
-        else Destroy(gameObject);
+        else if(GameManager.Instance.player != this) Destroy(gameObject);
     }
 
 
@@ -335,7 +335,8 @@ public class PlayerController : MonoBehaviour, IDamagable
         health -= damage;
         if(health <= 0)
         {
-            if (gun) weaponManager.DropGun();
+            weaponManager.ResetWeaponSlot();
+            weaponManager.ResetInventory();
 
             EnableRagdoll();
             GameManager.Instance.CurrentGamePlayMode.Fail();
@@ -361,5 +362,9 @@ public class PlayerController : MonoBehaviour, IDamagable
         if (characterController) characterController.detectCollisions = true;
         foreach (Rigidbody rigidbody in ragdollBodies) rigidbody.isKinematic = true;
     }
-    
+    public void ResetGunAndInventory()
+    {
+        weaponManager.ResetInventory();
+        weaponManager.ResetWeaponSlot();
+    }
 }

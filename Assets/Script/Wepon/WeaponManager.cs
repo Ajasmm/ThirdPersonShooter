@@ -31,11 +31,6 @@ public class WeaponManager : MonoBehaviour
     private void OnEnable()
     {
         myTransform = gameObject.GetComponent<Transform>();
-        if (bulletInventory == null)
-        {
-            bulletInventory = new Dictionary<BulletType, int>();
-            AddBullet(BulletType.Sniper, 10);
-        }
         if(weaponSlot == null || weaponSlot.Length != 2) weaponSlot = new Gun[2];
 
         gunData = new GunUIData();
@@ -43,6 +38,8 @@ public class WeaponManager : MonoBehaviour
 
         input = GameManager.Instance.input;
         input.Character.Drop.performed += OnDrop;
+
+        if(bulletInventory == null) bulletInventory = new Dictionary<BulletType, int>();
     }
     private void OnDisable()
     {
@@ -59,7 +56,7 @@ public class WeaponManager : MonoBehaviour
             if (weaponSlot[i] == null)
             {
                 gunData.isNull = true;
-                if (gunInfos[i] != null) gunInfos[i].UpdateData(gunData);
+                gunInfos[i].UpdateData(gunData);
             }
             else
             {
@@ -69,9 +66,14 @@ public class WeaponManager : MonoBehaviour
                 gunData.bulletInMag = weaponSlot[i].mag.bulletCount_Loaded;
                 bulletInventory.TryGetValue(gunData.bulletType, out gunData.bulletInHand);
 
-                if (gunInfos[i]) gunInfos[i].UpdateData(gunData);
+                gunInfos[i].UpdateData(gunData);
             }
 
+        }
+
+        foreach(var bulletType in bulletInventory.Keys)
+        {
+            Debug.Log($"Bullet Type {bulletType} count {bulletInventory[bulletType]}");
         }
     }
 
@@ -114,8 +116,6 @@ public class WeaponManager : MonoBehaviour
             weaponSlot[currentSlot].Equip(myTransform, lookAtObject, lookObject, out triggerTransform, out triggerWeight, out holdTransform, out holdWeight);
             characterMovement.gun = weaponSlot[currentSlot];
             activeGun = weaponSlot[currentSlot];
-
-
         }
     }
     private void UnEquipGun()
@@ -173,9 +173,21 @@ public class WeaponManager : MonoBehaviour
         if (bulletInventory.ContainsKey(bulletType)) return bulletInventory[bulletType];
         else return 0;
     }
+
     public void ResetWeaponSlot()
     {
+        foreach(Gun gun in weaponSlot)
+        {
+            if(gun == null) continue;
+            GameObject.Destroy(gun.gameObject);
+        }
         weaponSlot = new Gun[2];
+        characterMovement.gun = null;
+        activeGun = null;
+    }
+    public void ResetInventory()
+    {
+        bulletInventory = new Dictionary<BulletType, int>();
     }
 
     private void OnAnimatorIK(int layerIndex)

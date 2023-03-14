@@ -10,20 +10,23 @@ public class GameEndWindow : MonoBehaviour
 {
     [SerializeField] Button mainMenu_Button;
     [SerializeField] Button restart_Button;
+    [SerializeField] Button nextLevel_Button;
+    [SerializeField] int sceneIndex;
 
 
     private void OnEnable()
     {
-        mainMenu_Button.onClick.AddListener(OnMainMenu);
-        restart_Button.onClick.AddListener(OnRestart);
-
+        if(mainMenu_Button) mainMenu_Button.onClick.AddListener(OnMainMenu);
+        if (restart_Button) restart_Button.onClick.AddListener(OnRestart);
+        if (nextLevel_Button) nextLevel_Button.onClick.AddListener(OnNextLevel);
         GameManager.Instance.EnableCursor();
     }
 
     private void OnDisable()
     {
-        mainMenu_Button.onClick.RemoveListener(OnMainMenu);
-        restart_Button.onClick.RemoveListener(OnRestart);
+        if (mainMenu_Button) mainMenu_Button.onClick.RemoveListener(OnMainMenu);
+        if (restart_Button) restart_Button.onClick.RemoveListener(OnRestart);
+        if (nextLevel_Button) nextLevel_Button.onClick.RemoveListener(OnNextLevel);
     }
     
     private void OnMainMenu()
@@ -36,7 +39,11 @@ public class GameEndWindow : MonoBehaviour
         SceneManager.LoadSceneAsync(this.gameObject.scene.buildIndex);
         DisableAllButtons();
     }
-
+    private void OnNextLevel()
+    {
+        SceneManager.LoadSceneAsync(sceneIndex);
+        gameObject.SetActive(false);
+    }
     private void DisableAllButtons()
     {
         mainMenu_Button.interactable = false;

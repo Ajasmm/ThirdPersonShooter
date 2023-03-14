@@ -19,10 +19,6 @@ public class BeachScene_GamePlayMode : GamePlayMode
     [SerializeField] TMP_Text time;
 
     [Header("UI")]
-    [SerializeField] GameObject gamePlay_UI;
-    [SerializeField] GameObject pauseMenu_UI;
-    [SerializeField] GameObject Won_UI;
-    [SerializeField] GameObject Fail_UI;
     [SerializeField] GunInfo[] gunInfos;
 
     [Header("Timeline")]
@@ -37,27 +33,21 @@ public class BeachScene_GamePlayMode : GamePlayMode
 
     public override void Initialize()
     {
-        AddData("GunInfos", gunInfos);
-        totalZombies = zombies.Count;
-        foreach (AI_Enemy zombie in zombies) zombie.OnDestroy += OnZombieDie;
-        UpdateZombieCount();
-
         GetPlayer();
 
-        _Input = GameManager.Instance.input;
-        _Input.Character.Disable();
-        _Input.Menu.Disable();
-        _Input.Character.Escape.performed += OnPause;
-        _Input.TimeLine.Skip.performed += SkipCinematics;
+        AddData("GunInfos", gunInfos);
+        DisableAllWindows();
+        totalZombies = zombies.Count;
+        UpdateZombieCount();
+        foreach (AI_Enemy zombie in zombies) zombie.OnDestroy += OnZombieDie;
 
-        if(gamePlay_UI) gamePlay_UI.SetActive(false);
-        if(pauseMenu_UI) pauseMenu_UI.SetActive(false);
-        if (Won_UI) Won_UI.SetActive(false);
-        if(Fail_UI) Fail_UI.SetActive(false);
+        _Input = GameManager.Instance.input;
+        _Input.Disable();
+        _Input.Character.Escape.performed += OnPause;
 
         tempTime = timeToFinish;
 
-        PlayAsync();
+        PlayTimeLine();
     }
 
     
@@ -68,32 +58,64 @@ public class BeachScene_GamePlayMode : GamePlayMode
 
         UpdateTime(tempTime);
     }
-    private async void PlayAsync()
+    private async void PlayTimeLine()
     {
+        GameManager.Instance.DisableCursor();
+        _Input.TimeLine.Skip.performed += SkipTimeLine;
+
         Task waitForPlayer = GameManager.Instance.WaitForPlayer();
         await waitForPlayer;
 
-        Play();
+        if (director)
+        {
+            Animator playerAnimator = player.GetComponent<Animator>();
+            playerAnimator.applyRootMotion = true;
+
+            foreach (var bindings in director.playableAsset.outputs)
+            {
+                if (bindings.streamName == "Player Animation Track")
+                {
+                    director.SetGenericBinding(bindings.sourceObject, playerAnimator);
+                    break;
+                }
+            }
+            virtualCamera.m_LookAt = player.transform;
+
+            _Input.Disable();
+            _Input.TimeLine.Enable();
+
+            playerController.EnableCharacterInput(false);
+
+            director.stopped += OnTimeLineStop;
+            director.Play();
+        }
+        else OnTimeLineStop(null);
     }
     public override void Play()
     {
         Time.timeScale = 1;
         isPlaying = true;
-        DisableAllWindow();
+
+        _Input.Disable();
+        _Input.Character.Enable();
+
+        DisableAllWindows();
+        if (gamePlay_UI) gamePlay_UI.SetActive(true);
         GameManager.Instance.DisableCursor();
-        PlayTimeline();
+
+        playerController.EnableCharacterInput(isPlaying);
     }
     public override void Pause()
     {
         Time.timeScale = 0;
         isPlaying = false;
 
-        DisableAllWindow();
+        DisableAllWindows();
         if(pauseMenu_UI) pauseMenu_UI.SetActive(true);
         GameManager.Instance.EnableCursor();
 
+        _Input.Disable();
         _Input.Menu.Enable();
-        _Input.Character.Disable();
         playerController.EnableCharacterInput(isPlaying);
     }
     public override void Resume()
@@ -101,39 +123,36 @@ public class BeachScene_GamePlayMode : GamePlayMode
         Time.timeScale = 1;
         isPlaying = true;
 
-        DisableAllWindow();
+        DisableAllWindows();
         if(gamePlay_UI) gamePlay_UI.SetActive(true);
         GameManager.Instance.DisableCursor();
 
+        _Input.Disable();
         _Input.Character.Enable();
-        _Input.Menu.Disable();
         playerController.EnableCharacterInput(isPlaying);
     }
     public override void Stop()
     {
         isPlaying = false;
+        Time.timeScale = 1;
 
-        DisableAllWindow();
+        DisableAllWindows();
         playerController.EnableCharacterInput(isPlaying);
-        GameManager.Instance.EnableCursor();
 
-        _Input.TimeLine.Skip.performed -= SkipCinematics;
         _Input.Character.Escape.performed -= OnPause;
+        _Input.Disable();
 
-        _Input.Character.Disable();
-        _Input.Menu.Enable();
         foreach (AI_Enemy zombie in zombies) zombie.OnDestroy -= OnZombieDie;
-        isPlaying = false;
     }
     public override void Won()
     {
         Stop();
-        if(Won_UI) Won_UI.SetActive(true);
+        if(won_UI) won_UI.SetActive(true);
     }
     public override void Fail()
     {
         Stop();
-        if(Fail_UI) Fail_UI.SetActive(true);
+        if(fail_UI) fail_UI.SetActive(true);
     }
 
     [Tooltip("time in seconds")]
@@ -146,12 +165,12 @@ public class BeachScene_GamePlayMode : GamePlayMode
         seconds = (int) time % 60;
 
         this.time.SetText($"{minutes} : {seconds}");
-        if (tempTime <= 0) Fail();
+        if (tempTime <= 0 && isPlaying) Fail();
     }
     private void UpdateZombieCount()
     {
         zombieCount.text = string.Format($"Zombies : {zombies.Count} / {totalZombies}");
-        if (zombies.Count == 0) Invoke("Won", 0.5F);
+        if (zombies.Count == 0 && isPlaying) Invoke("Won", 0.5F);
     }
     private void OnZombieDie(AI_Enemy zombie)
     {
@@ -172,32 +191,11 @@ public class BeachScene_GamePlayMode : GamePlayMode
 
         playerController = player.GetComponent<PlayerController>();
         playerController.ResetHealth();
-        playerController.GetComponent<WeaponManager>().ResetWeaponSlot();
+        playerController.DisableRagdoll();
+        playerController.ResetGunAndInventory();
+        playerController.EnableCharacterInput(false);
     }
-    private void PlayTimeline()
-    {
-        if (director != null)
-        {
-            Animator playerAnimator = player.GetComponent<Animator>();
-            playerAnimator.applyRootMotion = true;
-
-            foreach (var bindings in director.playableAsset.outputs)
-            {
-                if (bindings.streamName == "Player Animation Track")
-                {
-                    director.SetGenericBinding(bindings.sourceObject, playerAnimator);
-                    break;
-                }
-            }
-            virtualCamera.m_LookAt = player.transform;
-            _Input.TimeLine.Enable();
-            playerController.EnableCharacterInput(false);
-            director.stopped += OnDirectorStop;
-            director.Play();
-        }
-        else OnDirectorStop(null);
-    }
-    private void OnDirectorStop(PlayableDirector director)
+    private void OnTimeLineStop(PlayableDirector director)
     {
         player.SetActive(false);
         Transform playerTransform = player.GetComponent<Transform>();
@@ -205,28 +203,17 @@ public class BeachScene_GamePlayMode : GamePlayMode
         playerTransform.rotation = playerStartPos.rotation;
         player.SetActive(true);
 
-        _Input.TimeLine.Disable();
-        _Input.Character.Enable();
-        if(director) playerController.EnableCharacterInput(true);
+        _Input.TimeLine.Skip.performed -= SkipTimeLine;
+        if (director) director.stopped -= OnTimeLineStop;
 
-        DisableAllWindow();
-        if (gamePlay_UI) gamePlay_UI.SetActive(true);
-
-        _Input.TimeLine.Skip.performed -= SkipCinematics;
+        Play();
     }
-    private void SkipCinematics(InputAction.CallbackContext context)
+    private void SkipTimeLine(InputAction.CallbackContext context)
     {
         director.Stop();
     }
     private void OnPause(InputAction.CallbackContext context)
     {
         Pause();
-    }
-    private void DisableAllWindow()
-    {
-        if (gamePlay_UI) gamePlay_UI.SetActive(false);
-        if (pauseMenu_UI) pauseMenu_UI.SetActive(false);
-        if(Won_UI) Won_UI.SetActive(false);
-        if(Fail_UI) Fail_UI.SetActive(false);
     }
 }

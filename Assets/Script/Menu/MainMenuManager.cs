@@ -52,7 +52,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void OnPlay()
     {
-        SceneManager.LoadSceneAsync("Level_02");
+        SceneManager.LoadSceneAsync(1);
         GameManager.Instance.CurrentGamePlayMode?.Stop();
         play_Button.interactable = false;
     }

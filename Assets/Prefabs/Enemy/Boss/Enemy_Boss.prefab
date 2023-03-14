@@ -3349,8 +3349,21 @@ MonoBehaviour:
   followrange: 10
   followWaitTime: 2
   patrolWaitDuration: 2
-  health: 200
+  health: 1000
   gamePlayMode: {fileID: 0}
+  ragdollColliders:
+  - {fileID: 4870196012493224085}
+  - {fileID: 6055835670106752624}
+  - {fileID: 7288749029108075570}
+  - {fileID: 3479559025712650982}
+  - {fileID: 5586778011512478630}
+  - {fileID: 7986195799178424283}
+  - {fileID: 2104807367229678205}
+  - {fileID: 447532332930814698}
+  - {fileID: 253768274849297166}
+  - {fileID: 8264363213912995368}
+  - {fileID: 7271916567809094777}
+  - {fileID: 6987160459931339808}
 --- !u!1 &8505004941054797361
 GameObject:
   m_ObjectHideFlags: 0

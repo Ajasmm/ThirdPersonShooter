@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Threading.Tasks;
 using System;
 using System.Threading;
+using UnityEngine.InputSystem;
 
 [Serializable]
 public class GameManager : MonoBehaviour

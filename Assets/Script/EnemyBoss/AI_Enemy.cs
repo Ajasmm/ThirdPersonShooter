@@ -1,10 +1,10 @@
-using AI.BehaviourTree;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
+using AI.BehaviourTree;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(NavMeshAgent))]
@@ -26,12 +26,17 @@ public class AI_Enemy : MonoBehaviour, IDamagable
 
     public Action<AI_Enemy> OnDestroy;
 
+    [Header("Ragdoll")]
+    [SerializeField] Collider[] ragdollColliders;
     Rigidbody[] ragdollBodies;
+
 
 
     Animator animator;
     Transform myTransform;
     NavMeshAgent navMeshAgent;
+    CharacterController characterController;
+    GameObject handWeapon;
     BehaviourTree BTTree = new BehaviourTree();
 
     private void Start()
@@ -43,12 +48,12 @@ public class AI_Enemy : MonoBehaviour, IDamagable
     private void InitializeRagdoll()
     {
         ragdollBodies = gameObject.GetComponentsInChildren<Rigidbody>();
-        foreach (Rigidbody rigidbody in ragdollBodies) rigidbody.isKinematic = true;
+        DisableRagdoll();
     }
 
     private void Update()
     {
-        BTTree.UpdateTree();
+        if(health > 0) BTTree.UpdateTree();
     }
 
     private async void InitializeBehaviourTree()
@@ -63,6 +68,8 @@ public class AI_Enemy : MonoBehaviour, IDamagable
         animator = GetComponent<Animator>();
         myTransform = GetComponent<Transform>();
         navMeshAgent = GetComponent<NavMeshAgent>();
+        characterController = GetComponent<CharacterController>();
+        handWeapon = GetComponentInChildren<HandWepon>().gameObject;
 
         BTTree.AddData("GamePlayMode", gamePlayMode);
         BTTree.AddData("Animator", animator);
@@ -70,6 +77,7 @@ public class AI_Enemy : MonoBehaviour, IDamagable
         BTTree.AddData("NavMeshAgent", navMeshAgent);
         BTTree.AddData("Waypoints", waypoints);
         BTTree.AddData("IsPreviouslyFollowing", false);
+        BTTree.AddData("HandWeapon", handWeapon);
 
         IsInRange isInAttackRange = new IsInRange(BTTree, attackRange);
         Attack attackNode = new Attack(BTTree);
@@ -143,7 +151,7 @@ public class AI_Enemy : MonoBehaviour, IDamagable
     public void Destroy()
     {
         EnableRagdoll();
-        OnDestroy.Invoke(this);
+        if (OnDestroy != null) OnDestroy(this);
         Destroy(gameObject, 5F);
     }
 
@@ -156,12 +164,20 @@ public class AI_Enemy : MonoBehaviour, IDamagable
     }
     private void EnableRagdoll()
     {
-       if(animator) animator.enabled = false;
+        if (animator) animator.enabled = false;
+        foreach (Collider col in ragdollColliders) col.enabled = true;
         foreach (Rigidbody rigidbody in ragdollBodies) rigidbody.isKinematic = false;
+
+        if(characterController) characterController.enabled = false;
+        if(navMeshAgent) navMeshAgent.enabled = false;
     }
     private void DisableRagdoll()
     {
         if (animator) animator.enabled = true;
+        foreach (Collider col in ragdollColliders) col.enabled = false;
         foreach (Rigidbody rigidbody in ragdollBodies) rigidbody.isKinematic = true;
+
+        if (characterController) characterController.enabled = true;
+        if (navMeshAgent) navMeshAgent.enabled = true;
     }
 }

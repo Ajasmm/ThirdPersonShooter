@@ -4,8 +4,15 @@ using UnityEngine;
 
 public abstract class GamePlayMode : MonoBehaviour
 {
+    [Header("Player Position")]
     [SerializeField] protected Transform playerStartPos_Cinematics;
     [SerializeField] protected Transform playerStartPos;
+
+    [Header("UI")]
+    [SerializeField] protected GameObject gamePlay_UI;
+    [SerializeField] protected GameObject pauseMenu_UI;
+    [SerializeField] protected GameObject won_UI;
+    [SerializeField] protected GameObject fail_UI;
 
     protected GameObject player;
 
@@ -31,5 +38,13 @@ public abstract class GamePlayMode : MonoBehaviour
         return (T)pullObject;
     }
     public void AddData(string key, object value) { data.Add(key, value); }
-    
+
+    protected void DisableAllWindows()
+    {
+        if (gamePlay_UI) gamePlay_UI.SetActive(false);
+        if (pauseMenu_UI) pauseMenu_UI.SetActive(false);
+        if (won_UI) won_UI.SetActive(false);
+        if (fail_UI) fail_UI.SetActive(false);
+    }
+
 }

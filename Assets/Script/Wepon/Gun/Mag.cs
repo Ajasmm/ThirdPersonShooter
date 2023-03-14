@@ -9,7 +9,7 @@ public class Mag : MonoBehaviour
     [SerializeField] int maxCapacity;
     [SerializeField] public BulletType bulletType; 
 
-    private void OnEnable()
+    private void Start()
     {
         bulletCount_Loaded = maxCapacity;
     }

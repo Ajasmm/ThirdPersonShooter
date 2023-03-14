@@ -125,7 +125,7 @@ public class Gun : PickableItem
         animAimPosition = 0F;
         scopeState = false;
 
-        transform.parent= parent;
+        transform.parent = parent;
 
         triggerTransform = this.triggerTransform; 
         triggerWeight = this.triggerWeight; 

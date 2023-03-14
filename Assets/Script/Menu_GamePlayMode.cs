@@ -6,29 +6,33 @@ using UnityEngine;
 public class Menu_GamePlayMode : GamePlayMode
 {
     [SerializeField] GameObject mainMenu_UI;
-    [SerializeField] MyInput input;
+    [SerializeField] MyInput _Input;
 
     public override void Initialize()
     {
         GetPlayer();
-        mainMenu_UI?.SetActive(true);
-        input = GameManager.Instance.input;
-
+        _Input = GameManager.Instance.input;
         PlayAsync();
     }
     private async void PlayAsync()
     {
         Task waitForPlayer = GameManager.Instance.WaitForPlayer();
         await waitForPlayer;
+
         player = GameManager.Instance.player;
         Play();
     }
     public override void Play()
     {
+        GameManager.Instance.EnableCursor();
+
         player.SetActive(false);
         player.transform.SetPositionAndRotation(playerStartPos.position, playerStartPos.rotation);
         player.SetActive(true);
-        input.Menu.Enable();
+
+        _Input.Disable();
+        _Input.Menu.Enable();
+
     }   
     public override void Pause()
     {
@@ -40,8 +44,9 @@ public class Menu_GamePlayMode : GamePlayMode
     }
     public override void Stop()
     {
+
+        GameManager.Instance.DisableCursor();
         player?.SetActive(false);
-        input.Menu.Disable();
         if(mainMenu_UI!=null) mainMenu_UI?.SetActive(false);
     }
     public override void Won()
@@ -65,7 +70,9 @@ public class Menu_GamePlayMode : GamePlayMode
 
         player = GameManager.Instance.player;
         PlayerController playerController = player.GetComponent<PlayerController>();
+        playerController.ResetHealth();
         playerController.DisableRagdoll();
+        playerController.ResetGunAndInventory();
         playerController.EnableCharacterInput(false);
     }
 }

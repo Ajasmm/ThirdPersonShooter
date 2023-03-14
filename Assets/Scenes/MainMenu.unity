@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.55807245, g: 0.5740348, b: 0.5879515, a: 1}
+  m_IndirectSpecularColor: {r: 0.5619012, g: 0.577028, b: 0.59009635, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -97,8 +97,8 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 112000000, guid: b0747c6272910ff45892d3fbee85da37, type: 2}
-  m_LightingSettings: {fileID: 4890085278179872738, guid: cd6c76b7aec0c0649b67169dc01ab058, type: 2}
+  m_LightingDataAsset: {fileID: 112000000, guid: e24d78eb595f8494e9bcd62d6eec96c7, type: 2}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: e433a42c48105844c959d59cd1db4933, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -2544,6 +2544,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerStartPos_Cinematics: {fileID: 0}
   playerStartPos: {fileID: 1850628376}
+  gamePlay_UI: {fileID: 0}
+  pauseMenu_UI: {fileID: 0}
+  won_UI: {fileID: 0}
+  fail_UI: {fileID: 0}
   mainMenu_UI: {fileID: 1738631182}
 --- !u!4 &1806590964
 Transform:

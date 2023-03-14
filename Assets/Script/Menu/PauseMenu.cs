@@ -17,9 +17,6 @@ public class PauseMenu : MonoBehaviour
         input = GameManager.Instance.input;
         input.Menu.Escape.performed += OnClose;
 
-        Time.timeScale = 0;
-        input.Character.Disable();
-
         continue_Button.onClick.AddListener(OnContinue);
         restart_Buttom.onClick.AddListener(OnRestart);
         exitToMenu_Button.onClick.AddListener(OnExitToMenu);

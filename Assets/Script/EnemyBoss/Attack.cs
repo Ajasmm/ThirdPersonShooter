@@ -49,6 +49,8 @@ public class Attack : ActionNode
         navMeshAgent.SetDestination(playerTransform.position);
         UpdateAnimationState();
         animator.SetTrigger(anim_AttackHash);
+        GameObject handWepon = GetData<GameObject>("HandWeapon");
+        handWepon.SetActive(true);
         return BehaviourTreeNodeState.Successful;
     }
 
