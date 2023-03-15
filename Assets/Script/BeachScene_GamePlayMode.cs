@@ -24,6 +24,8 @@ public class BeachScene_GamePlayMode : GamePlayMode
     [Header("Timeline")]
     [SerializeField] PlayableDirector director;
     [SerializeField] CinemachineVirtualCamera virtualCamera;
+    [SerializeField] PlayableAsset introTimeline;
+    [SerializeField] PlayableAsset winTimeline;
 
     MyInput _Input;
     float tempTime;
@@ -47,7 +49,7 @@ public class BeachScene_GamePlayMode : GamePlayMode
 
         tempTime = timeToFinish;
 
-        PlayTimeLine();
+        PlayIntroTimeline();
     }
 
     
@@ -58,19 +60,25 @@ public class BeachScene_GamePlayMode : GamePlayMode
 
         UpdateTime(tempTime);
     }
-    private async void PlayTimeLine()
+    private async void PlayIntroTimeline()
     {
         GameManager.Instance.DisableCursor();
         _Input.TimeLine.Skip.performed += SkipTimeLine;
 
-        Task waitForPlayer = GameManager.Instance.WaitForPlayer();
+        Task waitForPlayer = WaitForPlayer();
         await waitForPlayer;
+
+        player.SetActive(false);
+        Transform playerTransform = player.GetComponent<Transform>();
+        playerTransform.position = playerPos_IntroTimeline.position;
+        playerTransform.rotation = playerPos_IntroTimeline.rotation;
+        player.SetActive(true);
 
         if (director)
         {
+            director.playableAsset = introTimeline;
+            director.stopped += OnIntroTimelineStop;
             Animator playerAnimator = player.GetComponent<Animator>();
-            playerAnimator.applyRootMotion = true;
-
             foreach (var bindings in director.playableAsset.outputs)
             {
                 if (bindings.streamName == "Player Animation Track")
@@ -86,10 +94,49 @@ public class BeachScene_GamePlayMode : GamePlayMode
 
             playerController.EnableCharacterInput(false);
 
-            director.stopped += OnTimeLineStop;
             director.Play();
         }
-        else OnTimeLineStop(null);
+        else OnIntroTimelineStop(null);
+    }
+    private async void PlayWinTimeline()
+    {
+        GameManager.Instance.DisableCursor();
+        _Input.TimeLine.Skip.performed += SkipTimeLine;
+
+        Task waitForPlayer = WaitForPlayer();
+        await waitForPlayer; 
+        
+        player.SetActive(false);
+        Transform playerTransform = player.GetComponent<Transform>();
+        playerTransform.position = playerPos_WinTimeline.position;
+        playerTransform.rotation = playerPos_WinTimeline.rotation;
+        player.SetActive(true);
+
+        if (director)
+        {
+
+            director.playableAsset = winTimeline;
+            director.stopped += OnWinTimelineStop;
+            Animator playerAnimator = player.GetComponent<Animator>();
+            foreach (var bindings in director.playableAsset.outputs)
+            {
+                if (bindings.streamName == "Player Animation Track")
+                {
+                    director.SetGenericBinding(bindings.sourceObject, playerAnimator);
+                    break;
+                }
+            }
+            virtualCamera.m_LookAt = player.transform;
+
+            _Input.Disable();
+            _Input.TimeLine.Enable();
+
+            Time.timeScale = 1;
+            playerController.EnableCharacterInput(false);
+
+            director.Play();
+        }
+        else OnWinTimelineStop(null);
     }
     public override void Play()
     {
@@ -147,7 +194,7 @@ public class BeachScene_GamePlayMode : GamePlayMode
     public override void Won()
     {
         Stop();
-        if(won_UI) won_UI.SetActive(true);
+        PlayWinTimeline();
     }
     public override void Fail()
     {
@@ -179,15 +226,8 @@ public class BeachScene_GamePlayMode : GamePlayMode
     }
     private async void GetPlayer()
     {
-        Task waitForPlayer = GameManager.Instance.WaitForPlayer();
+        Task waitForPlayer = WaitForPlayer();
         await waitForPlayer;
-
-        player = GameManager.Instance.player;
-        player.SetActive(false);
-        Transform playerTransform = player.GetComponent<Transform>();
-        playerTransform.position = playerStartPos_Cinematics.position;
-        playerTransform.rotation = playerStartPos_Cinematics.rotation;
-        player.SetActive(true);
 
         playerController = player.GetComponent<PlayerController>();
         playerController.ResetHealth();
@@ -195,7 +235,7 @@ public class BeachScene_GamePlayMode : GamePlayMode
         playerController.ResetGunAndInventory();
         playerController.EnableCharacterInput(false);
     }
-    private void OnTimeLineStop(PlayableDirector director)
+    private void OnIntroTimelineStop(PlayableDirector director)
     {
         player.SetActive(false);
         Transform playerTransform = player.GetComponent<Transform>();
@@ -204,9 +244,19 @@ public class BeachScene_GamePlayMode : GamePlayMode
         player.SetActive(true);
 
         _Input.TimeLine.Skip.performed -= SkipTimeLine;
-        if (director) director.stopped -= OnTimeLineStop;
+        if (director) director.stopped -= OnIntroTimelineStop;
 
         Play();
+    }
+    private void OnWinTimelineStop(PlayableDirector director)
+    {
+        _Input.TimeLine.Skip.performed -= SkipTimeLine;
+        if (director) director.stopped -= OnIntroTimelineStop;
+
+        _Input.Disable();
+        _Input.Menu.Enable();
+
+        if (won_UI != null) won_UI.SetActive(true); 
     }
     private void SkipTimeLine(InputAction.CallbackContext context)
     {

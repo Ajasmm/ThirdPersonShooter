@@ -10,7 +10,11 @@ using UnityEngine.Windows;
 
 public class WareHouse_GamePlayMode : GamePlayMode
 {
+    [Header("TimeLine")]
     [SerializeField] PlayableDirector director;
+    [SerializeField] PlayableAsset introTimeLineAsset;
+    [SerializeField] PlayableAsset winTimeLineAsset;
+
     [SerializeField] List<AI_Enemy> zombies;
     [SerializeField] float timeToCompleteLevel;
     [SerializeField] TMP_Text time;
@@ -42,7 +46,7 @@ public class WareHouse_GamePlayMode : GamePlayMode
         UpdateZombieCount();
         UpdateTime(countDownTime);
 
-        PlayTimeLine();
+        PlayIntroTimeLine();
     }
     private async void GetPlayer()
     {
@@ -56,32 +60,68 @@ public class WareHouse_GamePlayMode : GamePlayMode
         playerController.DisableRagdoll();
         playerController.ResetGunAndInventory();
         playerController.EnableCharacterInput(false);
-
-        playerTransform.gameObject.SetActive(false);
-        playerTransform.SetPositionAndRotation(playerStartPos_Cinematics.position, playerStartPos_Cinematics.rotation);
-        playerTransform.gameObject.SetActive(true);
     }
 
-    private async void PlayTimeLine()
+    private async void PlayIntroTimeLine()
     {
         GameManager.Instance.DisableCursor();
 
-        Task waitForPlayer = GameManager.Instance.WaitForPlayer();
+        Task waitForPlayer = WaitForPlayer();
         await waitForPlayer;
+
+        playerTransform.gameObject.SetActive(false);
+        playerTransform.SetPositionAndRotation(playerPos_IntroTimeline.position, playerPos_IntroTimeline.rotation);
+        playerTransform.gameObject.SetActive(true);
 
         _Input.TimeLine.Skip.performed += SkipCinematics;
         if (director != null)
         {
+            director.playableAsset = introTimeLineAsset;
             _Input.Disable();
             _Input.TimeLine.Enable();
 
-            director.stopped += OnTimeLineStop;
+            director.stopped += OnIntroTimeLineStop;
             Time.timeScale = 1;
             playerController.EnableCharacterInput(false);
 
             director.Play();
         }
-        else OnTimeLineStop(null);
+        else OnIntroTimeLineStop(null);
+    }
+    private async void PlayWinTimeLine()
+    {
+        GameManager.Instance.DisableCursor();
+
+        Task waitForPlayer = WaitForPlayer();
+        await waitForPlayer;
+
+        _Input.TimeLine.Skip.performed += SkipCinematics;
+        if (director != null)
+        {
+            director.playableAsset = winTimeLineAsset;
+            _Input.Disable();
+            _Input.TimeLine.Enable();
+
+            director.stopped += OnWinTimeLineStop;
+            Time.timeScale = 1;
+            playerController.EnableCharacterInput(false);
+
+            player.SetActive(false);
+            playerTransform.SetPositionAndRotation(playerPos_WinTimeline.position, playerPos_WinTimeline.rotation);
+            player.SetActive(true);
+
+            foreach(var binding in director.playableAsset.outputs)
+            {
+                if(binding.streamName == "Player Animation Track")
+                {
+                    director.SetGenericBinding(binding.sourceObject, player.GetComponent<Animator>());
+                    break;
+                }
+            }
+
+            director.Play();
+        }
+        else OnIntroTimeLineStop(null);
     }
 
     public override void Play()
@@ -137,7 +177,7 @@ public class WareHouse_GamePlayMode : GamePlayMode
     public override void Won()
     {
         Stop();
-        won_UI.SetActive(true);
+        PlayWinTimeLine();
     }
     public override void Fail()
     {
@@ -154,16 +194,27 @@ public class WareHouse_GamePlayMode : GamePlayMode
 
     }
 
-    private void OnTimeLineStop(PlayableDirector director)
+    private void OnIntroTimeLineStop(PlayableDirector director)
     {
+        Debug.Log("Intro timeLine finfished");
         _Input.TimeLine.Skip.performed -= SkipCinematics;
-        if (director) director.stopped -= OnTimeLineStop;
+        if (director) director.stopped -= OnIntroTimeLineStop;
 
         playerTransform.gameObject.SetActive(false);
         playerTransform.SetPositionAndRotation(playerStartPos.position, playerStartPos.rotation);
         playerTransform.gameObject.SetActive(true);
 
         Play();
+    }
+    private void OnWinTimeLineStop(PlayableDirector director)
+    {
+        _Input.TimeLine.Skip.performed -= SkipCinematics;
+        if (director) director.stopped -= OnIntroTimeLineStop;
+
+        _Input.Disable();
+        _Input.Menu.Enable();
+
+        if (won_UI != null) won_UI.SetActive(true);
     }
     private void UpdateTime(float reminingTime)
     {

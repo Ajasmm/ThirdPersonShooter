@@ -2542,8 +2542,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07f114944211d454687174ec8b9c894c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerStartPos_Cinematics: {fileID: 0}
+  playerPos_IntroTimeline: {fileID: 0}
   playerStartPos: {fileID: 1850628376}
+  playerPos_WinTimeline: {fileID: 0}
   gamePlay_UI: {fileID: 0}
   pauseMenu_UI: {fileID: 0}
   won_UI: {fileID: 0}
