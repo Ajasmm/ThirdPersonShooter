@@ -1,23 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class ExitWinow : MonoBehaviour
 {
-    [SerializeField] private Button yes_Button;
-    [SerializeField] private Button no_Button;
+    VisualElement rootVisualElement;
+
+    Button yes_Button;
+    Button no_Button;
 
     private void OnEnable()
     {
-        yes_Button.onClick.AddListener(OnYes);
-        no_Button.onClick.AddListener(OnNo);
-    }
+        rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
 
+        yes_Button = rootVisualElement.Q<Button>("Yes");
+        no_Button = rootVisualElement.Q<Button>("No");
+
+        yes_Button.clicked += OnYes;
+        no_Button.clicked += OnNo;
+    }
     private void OnDisable()
     {
-        yes_Button.onClick.RemoveAllListeners();
-        no_Button.onClick.RemoveAllListeners();
+        yes_Button.clicked -= OnYes;
+        no_Button.clicked -= OnNo;
     }
 
     private void OnYes()

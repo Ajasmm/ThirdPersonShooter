@@ -2,19 +2,24 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class SettingsWindow : MonoBehaviour
 {
-    [SerializeField] Button exit_Button;
+    VisualElement rootVisualElement;
+    Button exit_Button;
 
     private void OnEnable()
     {
-        exit_Button.onClick.AddListener(OnExit);
+        rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
+
+        exit_Button = rootVisualElement.Q<Button>("Exit");
+
+        exit_Button.clicked += OnExit;
     }
     private void OnDisable()
     {
-        exit_Button.onClick.RemoveAllListeners();
+        exit_Button.clicked -= OnExit;
     }
 
     private void OnExit()

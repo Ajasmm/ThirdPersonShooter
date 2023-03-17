@@ -118,13 +118,15 @@ public class BeachScene_GamePlayMode : GamePlayMode
             director.playableAsset = winTimeline;
             director.stopped += OnWinTimelineStop;
             Animator playerAnimator = player.GetComponent<Animator>();
-            foreach (var bindings in director.playableAsset.outputs)
+            foreach (PlayableBinding bindings in director.playableAsset.outputs)
             {
                 if (bindings.streamName == "Player Animation Track")
                 {
                     director.SetGenericBinding(bindings.sourceObject, playerAnimator);
                     break;
+
                 }
+                
             }
             virtualCamera.m_LookAt = player.transform;
 
@@ -202,7 +204,7 @@ public class BeachScene_GamePlayMode : GamePlayMode
         if(fail_UI) fail_UI.SetActive(true);
     }
 
-    [Tooltip("time in seconds")]
+
     private void UpdateTime(float time)
     {
         int seconds, minutes;

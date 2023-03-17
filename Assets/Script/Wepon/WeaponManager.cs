@@ -70,11 +70,6 @@ public class WeaponManager : MonoBehaviour
             }
 
         }
-
-        foreach(var bulletType in bulletInventory.Keys)
-        {
-            Debug.Log($"Bullet Type {bulletType} count {bulletInventory[bulletType]}");
-        }
     }
 
 

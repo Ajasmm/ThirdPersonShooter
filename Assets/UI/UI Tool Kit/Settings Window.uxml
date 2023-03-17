@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/UI%20Tool%20Kit/Menu.uss?fileID=7433441132597879392&amp;guid=62af8e68099059f4aa09166e5dcffb02&amp;type=3#Menu" />
+    <ui:VisualElement name="Panel" style="width: 100%; height: 100%; justify-content: center; align-items: center;">
+        <ui:VisualElement name="SettingsWindow" style="width: 70%; height: 60%; background-color: rgba(255, 255, 255, 0.59); border-top-left-radius: 20px; border-bottom-left-radius: 20px; border-top-right-radius: 20px; border-bottom-right-radius: 20px;">
+            <ui:Button display-tooltip-when-elided="true" name="Exit" class="ExitButton" style="background-image: url(&apos;project://database/Packages/com.unity.collab-proxy/Editor/PlasticSCM/Assets/Images/d_icondeletedremote@2x.png?fileID=2800000&amp;guid=626b9cddb29049e4cac50cd87b419945&amp;type=3#d_icondeletedremote@2x&apos;);" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

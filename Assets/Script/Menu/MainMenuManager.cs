@@ -5,14 +5,17 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class MainMenuManager : MonoBehaviour
 {
-    [Header("Buttons")]
-    [SerializeField] Button play_Button;
-    [SerializeField] Button settings_Button;
-    [SerializeField] Button exit_Button;
+    [SerializeField] private UIDocument mainMenu;
+
+    VisualElement rootVisualElement;
+
+    Button play_Button;
+    Button settings_Button;
+    Button exit_Button;
 
     [Header("Menu Windows")]
     [SerializeField] private GameObject settingsWindow;
@@ -27,9 +30,15 @@ public class MainMenuManager : MonoBehaviour
 
         inputSystem.Menu.Escape.performed += OnExitByEscapeButton;
 
-        play_Button.onClick.AddListener(OnPlay);
-        settings_Button.onClick.AddListener(OnSettings);
-        exit_Button.onClick.AddListener(OnExit);
+        rootVisualElement = mainMenu.GetComponent<UIDocument>().rootVisualElement;
+
+        play_Button = rootVisualElement.Q<Button>("Play");
+        settings_Button = rootVisualElement.Q<Button>("Settings");
+        exit_Button = rootVisualElement.Q<Button>("Exit");
+
+        play_Button.clicked += OnPlay;
+        settings_Button.clicked += OnSettings;
+        exit_Button.clicked += OnExit;
 
         DisableAllWindows();
 
@@ -43,9 +52,9 @@ public class MainMenuManager : MonoBehaviour
 
         inputSystem.Menu.Escape.performed -= OnExitByEscapeButton;
 
-        play_Button.onClick.RemoveAllListeners();
-        settings_Button.onClick.RemoveAllListeners();
-        exit_Button.onClick.RemoveAllListeners();
+        play_Button.clicked -= OnPlay;
+        settings_Button.clicked -= OnSettings;
+        exit_Button.clicked -= OnExit;
 
         GameManager.Instance.DisableCursor();
     }
@@ -54,7 +63,7 @@ public class MainMenuManager : MonoBehaviour
     {
         SceneManager.LoadSceneAsync(1);
         GameManager.Instance.CurrentGamePlayMode?.Stop();
-        play_Button.interactable = false;
+        play_Button.SetEnabled(false);
     }
 
     public void OnSettings()

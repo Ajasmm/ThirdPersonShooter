@@ -1,14 +1,15 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class PauseMenu : MonoBehaviour
 {
+    VisualElement rootElement;
 
-    [SerializeField] Button continue_Button;
-    [SerializeField] Button restart_Buttom;
-    [SerializeField] Button exitToMenu_Button;
+    Button resume_Button;
+    Button restart_Buttom;
+    Button menu_Button;
 
     MyInput input;
 
@@ -17,10 +18,15 @@ public class PauseMenu : MonoBehaviour
         input = GameManager.Instance.input;
         input.Menu.Escape.performed += OnClose;
 
-        continue_Button.onClick.AddListener(OnContinue);
-        restart_Buttom.onClick.AddListener(OnRestart);
-        exitToMenu_Button.onClick.AddListener(OnExitToMenu);
+        rootElement = GetComponent<UIDocument>().rootVisualElement;
 
+        resume_Button = rootElement.Q<Button>("Resume");
+        restart_Buttom = rootElement.Q<Button>("Restart");
+        menu_Button = rootElement.Q<Button>("Menu");
+
+        resume_Button.clicked += OnResume;
+        restart_Buttom.clicked += OnRestart;
+        menu_Button.clicked += OnMenu;
 
         GameManager.Instance.EnableCursor();
     }
@@ -28,15 +34,14 @@ public class PauseMenu : MonoBehaviour
     {
         input.Menu.Escape.performed -= OnClose;
 
-        continue_Button.onClick.RemoveAllListeners();
-        restart_Buttom.onClick.RemoveAllListeners();
-        exitToMenu_Button.onClick.RemoveAllListeners();
-
+        resume_Button.clicked -= OnResume;
+        restart_Buttom.clicked -= OnRestart;
+        menu_Button.clicked -= OnMenu;
 
         GameManager.Instance.DisableCursor();
     }
 
-    private void OnContinue()
+    private void OnResume()
     {
         GameManager.Instance.CurrentGamePlayMode.Resume();
     }
@@ -46,7 +51,7 @@ public class PauseMenu : MonoBehaviour
         SceneManager.LoadSceneAsync(this.gameObject.scene.buildIndex);
         DisableButtons();
     }
-    private void OnExitToMenu()
+    private void OnMenu()
     {
         GameManager.Instance.CurrentGamePlayMode.Stop();
         SceneManager.LoadSceneAsync(0);
@@ -54,13 +59,13 @@ public class PauseMenu : MonoBehaviour
     }
     private void OnClose(InputAction.CallbackContext context)
     {
-        OnContinue();
+        OnResume();
     }
 
     private void DisableButtons()
     {
-        continue_Button.interactable = false;
-        restart_Buttom.interactable = false;
-        exitToMenu_Button.interactable = false;
+        resume_Button.SetEnabled(false);
+        restart_Buttom.SetEnabled(false);
+        menu_Button.SetEnabled(false);
     }
 }

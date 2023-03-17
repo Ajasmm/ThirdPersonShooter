@@ -1,32 +1,42 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class GameEndWindow : MonoBehaviour
 {
-    [SerializeField] Button mainMenu_Button;
-    [SerializeField] Button restart_Button;
-    [SerializeField] Button nextLevel_Button;
-    [SerializeField] int sceneIndex;
+    [SerializeField] int sceneIndex = -1;
+
+    VisualElement rootVisualElement;
+
+    Button mainMenu_Button;
+    Button restart_Button;
+    Button nextLevel_Button;
 
 
     private void OnEnable()
     {
-        if(mainMenu_Button) mainMenu_Button.onClick.AddListener(OnMainMenu);
-        if (restart_Button) restart_Button.onClick.AddListener(OnRestart);
-        if (nextLevel_Button) nextLevel_Button.onClick.AddListener(OnNextLevel);
+        rootVisualElement = gameObject.GetComponent<UIDocument>().rootVisualElement;
+
+        restart_Button = rootVisualElement.Q<Button>("Restart");
+        nextLevel_Button = rootVisualElement.Q<Button>("Next");
+        mainMenu_Button = rootVisualElement.Q<Button>("Menu");
+
+        mainMenu_Button.clicked += OnMainMenu;
+        restart_Button.clicked += OnRestart;
+
+        if (sceneIndex > 0) nextLevel_Button.clicked += OnNextLevel;
+        else if (nextLevel_Button != null) rootVisualElement.Q<VisualElement>("Buttons").Remove(nextLevel_Button);
+
         GameManager.Instance.EnableCursor();
     }
 
+
     private void OnDisable()
     {
-        if (mainMenu_Button) mainMenu_Button.onClick.RemoveListener(OnMainMenu);
-        if (restart_Button) restart_Button.onClick.RemoveListener(OnRestart);
-        if (nextLevel_Button) nextLevel_Button.onClick.RemoveListener(OnNextLevel);
+        mainMenu_Button.clicked -= OnMainMenu;
+        restart_Button.clicked -= OnRestart;
+
+        if (sceneIndex > 0) nextLevel_Button.clicked -= OnNextLevel;
     }
     
     private void OnMainMenu()
@@ -46,7 +56,9 @@ public class GameEndWindow : MonoBehaviour
     }
     private void DisableAllButtons()
     {
-        mainMenu_Button.interactable = false;
-        restart_Button.interactable = false;
+        mainMenu_Button.SetEnabled(false);
+        restart_Button.SetEnabled(false);
+
+        if (sceneIndex < 0) nextLevel_Button?.SetEnabled(false);
     }
 }
