@@ -84,7 +84,7 @@ public class GameManager : MonoBehaviour
         {
             while (player == null)
             {
-                Debug.Log("Player is not registered");
+                // Debug.Log("Player is not registered");
                 if (cancellationToken.IsCancellationRequested)
                 {
                     cancellationToken.ThrowIfCancellationRequested();

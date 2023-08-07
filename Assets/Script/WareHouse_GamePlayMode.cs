@@ -196,7 +196,7 @@ public class WareHouse_GamePlayMode : GamePlayMode
 
     private void OnIntroTimeLineStop(PlayableDirector director)
     {
-        Debug.Log("Intro timeLine finfished");
+        // Debug.Log("Intro timeLine finfished");
         _Input.TimeLine.Skip.performed -= SkipCinematics;
         if (director) director.stopped -= OnIntroTimeLineStop;
 

@@ -28,16 +28,15 @@ public class PickSystem : MonoBehaviour
     private void OnEnable()
     {
         inputSystem = GameManager.Instance.input;
-        if (inputSystem == null) Debug.LogError("No Input Found");
 
         inputSystem.Character.Action.performed += OnAction;
 
         // If no Animator or Character controller is attached then Disable this behaviour
         if (animator == null) animator = gameObject.GetComponent<Animator>();
-        if (animator == null) { Debug.LogError("No Animator found"); this.enabled = false; }
+        if (animator == null) { this.enabled = false; }
 
         if (characterMovement == null) characterMovement = gameObject.GetComponent<PlayerController>();
-        if (characterMovement == null) { Debug.LogError("No character movement found"); this.enabled = false; }
+        if (characterMovement == null) {this.enabled = false; }
     }
     private void OnDisable()
     {
@@ -61,8 +60,10 @@ public class PickSystem : MonoBehaviour
         {
             lookAtObject.position = hitObject.point;
 
-            if (hitObject.distance < 5) tempSelectedItem = hitObject.transform.gameObject.GetComponent<PickableItem>();
-            else tempSelectedItem = null;
+            if (hitObject.distance < 5)
+                tempSelectedItem = hitObject.transform.gameObject.GetComponent<PickableItem>();
+            else
+                tempSelectedItem = null;
 
             if (tempSelectedItem == null)
             {
@@ -107,7 +108,6 @@ public class PickSystem : MonoBehaviour
         Gun gun = selectedItem.gameObject.GetComponent<Gun>();
         if(gun == null)
         {
-            Debug.LogError("No Gun Found");
             return;
         }
         weaponManager.AddGun(gun);

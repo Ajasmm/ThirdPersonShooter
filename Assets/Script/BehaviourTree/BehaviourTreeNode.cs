@@ -39,12 +39,12 @@ namespace AI.BehaviourTree
             object pullObject;
             if (tree.blackBoard.TryGetValue(key, out pullObject))
             {
-                if(pullObject == null) Debug.Log($"error occured with Key : {key} and Object is null");
+                // if(pullObject == null) Debug.Log($"error occured with Key : {key} and Object is null");
                 value = (T)pullObject;
                 return value;
             }
 
-            Debug.Log("error occured with Key : " + key);
+            // Debug.Log("error occured with Key : " + key);
             return default(T);
         }
         public void AddData(string key, object data)

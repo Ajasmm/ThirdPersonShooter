@@ -182,7 +182,7 @@ public class Gun : PickableItem
         }
         catch
         {
-            Debug.LogError("Error while getting damagable");
+            // Debug.LogError("Error while getting damagable");
             return;
         }
         if (damagableObject == null) return;

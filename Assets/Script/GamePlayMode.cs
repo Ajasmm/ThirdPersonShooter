@@ -36,7 +36,7 @@ public abstract class GamePlayMode : MonoBehaviour
         object pullObject;
         if (!data.TryGetValue(key, out pullObject) || pullObject == null)
         {
-            Debug.Log($"Error with key {key}");
+            // Debug.Log($"Error with key {key}");
             return default(T);
         }
         return (T)pullObject;
@@ -59,7 +59,7 @@ public abstract class GamePlayMode : MonoBehaviour
             while (GameManager.Instance.player == null)
             {
                 if (cancellationTokenSource.IsCancellationRequested) { return; }
-                Debug.Log("Player not registered");
+                // Debug.Log("Player not registered");
             }
             player = GameManager.Instance.player;
         }, cancellationTokenSource.Token);

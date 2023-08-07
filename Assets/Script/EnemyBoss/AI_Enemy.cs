@@ -62,7 +62,7 @@ public class AI_Enemy : MonoBehaviour, IDamagable
         await waitForPlayer;
 
         player = GameManager.Instance.player.transform;
-        if (player == null) Debug.Log("Player transform not found in Enemy");
+        // if (player == null) Debug.Log("Player transform not found in Enemy");
         
         BTTree.AddData("PlayerTransform", player);
         animator = GetComponent<Animator>();
